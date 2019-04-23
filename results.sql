@@ -1,31 +1,31 @@
 use test
 set names utf8;
 
--- 1. Выбрать все товары (все поля)
+-- 1. choose all products (all fields)
 select * from product
 
--- 2. Выбрать названия всех автоматизированных складов
+-- 2. Choose names of all automated stocks
 select name from store where store.is_automated = 1;
 
--- 3. Посчитать общую сумму в деньгах всех продаж
+-- 3. Count total sum of all sales in money
 select SUM(total) from sale;
 
--- 4. Получить уникальные store_id всех складов, с которых была хоть одна продажа
+-- 4. Get unique store_id of all stocks, where was at least one sale
 SELECT DISTINCT store_id FROM sale WHERE quantity>0;
 
--- 5. Получить уникальные store_id всех складов, с которых не было ни одной продажи
+-- 5. Get unique store_id of all stocks, where were no sales
 select store_id from store where store_id not in(select store_id from sale);
 
--- 6. Получить для каждого товара название и среднюю стоимость единицы товара avg(total/quantity), если товар не продавался, он не попадает в отчет.
+-- 6. Get name and average cost of every product
 select product.name, avg(total/quantity) from sale, product where sale.product_id = product.product_id  group by sale.product_id
 
--- 7. Получить названия всех продуктов, которые продавались только с единственного склада
+-- 7. Get names of all products, that were sold only from one stock
 select name from (select product.name, count(distinct store_id) as sc from sale join product on sale.product_id = product.product_id group by sale.product_id having sc = 1) as T;
--- 8. Получить названия всех складов, с которых продавался только один продукт
+-- 8. Get names of all stocks, where was sold only one product
 select name from (select store.name, count(distinct(sale.product_id)) as pc from sale join store on sale.store_id = store.store_id group by sale.store_id having pc = 1) as T;
 
--- 9. Выберите все ряды (все поля) из продаж, в которых сумма продажи (total) максимальна (равна максимальной из всех встречающихся)
+-- 9. Choose all rows (all fields) from sales, where sum of sale (total) was max
 select * from sale where total in (select max(total) from sale);
 
--- 10. Выведите дату самых максимальных продаж, если таких дат несколько, то самую раннюю из них
+-- 10. Print date of maximal sales, if there's more than one date , then choose the latest date
 select date from sale order by total limit 1;
